@@ -16,10 +16,9 @@ export default function PomodoroTimer() {
   const [workDuration, setWorkDuration] = useState(25)
   const [breakDuration, setBreakDuration] = useState(5)
   
-  // Properly typed audio references
+  // Audio references
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null)
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null)
-  const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     // Initialize audio elements
@@ -150,20 +149,6 @@ export default function PomodoroTimer() {
           <div className="text-4xl font-bold text-orange-900">
             {minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}
           </div>
-
-          {/* Audio Controls */}
-          {isRunning && (
-            <div className="w-full max-w-sm">
-              <audio
-                controls
-                src="/music.mp3"
-                ref={audioElementRef}
-                className="w-full"
-              >
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-          )}
 
           {/* Controls */}
           <div className="flex items-center space-x-4">
