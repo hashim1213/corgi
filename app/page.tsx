@@ -15,10 +15,51 @@ export default function PomodoroTimer() {
   const [isBreak, setIsBreak] = useState(false)
   const [workDuration, setWorkDuration] = useState(25)
   const [breakDuration, setBreakDuration] = useState(5)
+  const [currentMessage, setCurrentMessage] = useState("")
   
   // Audio references
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null)
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null)
+
+  // Motivation messages
+  const studyMessages = [
+    "Pharmacy! Pharmacy! Pharmacy!💪",
+    "Small steps lead to big achievements! 🎯",
+    "You can only get a tatoo if you study ⚡",
+    "Range Rover, Bronco, Family, Future Corgi! 🏆",
+    "Building your future, one study session at a time! 🌈",
+    "Only A's Baby!!! 🌟",
+    "Keep going, you have coke zero in your veins!💪",
+    "Stay focused, stay awesome! ✨",
+    "Making progress like a champion! 🎉"
+  ]
+
+  const breakMessages = [
+    "Would John Wick give up on his dog? 🌟",
+    "You deserve this break! Relax and recharge 😌",
+    "Great work! Time to rest your mind 🌟",
+    "Take a deep breath, you're doing great! 💫",
+    "Proud of your focus! Enjoy your break 🎉",
+    "Rest well, you've earned it! ⭐",
+    "Your dedication is amazing! Time to recharge 🔋",
+    "Fantastic work! Take care of yourself 💝",
+    "You're making great progress! Time to refresh 🌈",
+    "Wonderful effort! Enjoy your break 🎯",
+    "You're crushing it! Time for a well-deserved rest 💪"
+  ]
+
+  const pausedMessages = [
+    "Pause and reflect, you're doing great! ✨",
+    "Stop taking a break!!!!💫",
+    "Hurry uppp, your future is waiting 🌟",
+    "Ready to continue when you are! 💪",
+    "Your progress is safe with me! 🎯",
+    "Take the time you need! 🌈",
+    "Small pauses help us go further! ⭐",
+    "Recharge and come back stronger! 🔋",
+    "You're doing fantastic! Take your time! 💝",
+    "Every break is a chance to refresh! 🎉"
+  ]
 
   useEffect(() => {
     // Initialize audio elements
@@ -29,6 +70,15 @@ export default function PomodoroTimer() {
     const notifSound = new Audio("/notification.mp3")
     notificationSoundRef.current = notifSound
   }, [])
+
+  // Update message when timer state changes
+  useEffect(() => {
+    const messages = isBreak ? breakMessages : 
+                    !isRunning ? pausedMessages : 
+                    studyMessages
+    const randomIndex = Math.floor(Math.random() * messages.length)
+    setCurrentMessage(messages[randomIndex])
+  }, [isBreak, isRunning])
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined
@@ -202,8 +252,8 @@ export default function PomodoroTimer() {
             </Dialog>
           </div>
 
-          {/* Status */}
-          <p className="text-orange-600 font-medium">{isBreak ? "Take a break!" : "Study time!"}</p>
+          {/* Status with Motivational Messages */}
+          <p className="text-orange-600 font-medium text-center px-4">{currentMessage}</p>
         </div>
       </Card>
     </div>
