@@ -25,7 +25,7 @@ export default function PomodoroTimer() {
   const studyMessages = [
     "Pharmacy! Pharmacy! Pharmacy!💪",
     "Small steps lead to big achievements! 🎯",
-    "You can only get a tatoo if you study ⚡",
+    "You can only get a tattoo if you study ⚡",
     "Range Rover, Bronco, Family, Future Corgi! 🏆",
     "Building your future, one study session at a time! 🌈",
     "Only A's Baby!!! 🌟",
