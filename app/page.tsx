@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Play, Pause, RotateCcw, Settings } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -10,43 +10,87 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export default function PomodoroTimer() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60) // 25 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
   const [isRunning, setIsRunning] = useState(false)
   const [isBreak, setIsBreak] = useState(false)
   const [workDuration, setWorkDuration] = useState(25)
   const [breakDuration, setBreakDuration] = useState(5)
+  
+  // Properly typed audio references
+  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null)
+  const notificationSoundRef = useRef<HTMLAudioElement | null>(null)
+  const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    // Initialize audio elements
+    const bgMusic = new Audio("/music.mp3")
+    bgMusic.loop = true
+    backgroundMusicRef.current = bgMusic
+
+    const notifSound = new Audio("/notification.mp3")
+    notificationSoundRef.current = notifSound
+  }, [])
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((time) => time - 1)
       }, 1000)
+
+      // Start background music when timer starts
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.play().catch(() => {})
+      }
     } else if (timeLeft === 0) {
-      // Play sound effect
-      new Audio("/notification.mp3").play().catch(() => {})
+      // Play notification sound
+      if (notificationSoundRef.current) {
+        notificationSoundRef.current.play().catch(() => {})
+      }
+      
       // Switch between work and break
       setIsBreak(!isBreak)
       setTimeLeft((!isBreak ? breakDuration : workDuration) * 60)
     }
 
-    return () => clearInterval(interval)
+    // Cleanup function
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+      if (!isRunning && backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause()
+        backgroundMusicRef.current.currentTime = 0
+      }
+    }
   }, [isRunning, timeLeft, isBreak, breakDuration, workDuration])
 
   const toggleTimer = () => {
     setIsRunning(!isRunning)
+    
+    // Handle background music
+    if (!isRunning && backgroundMusicRef.current) {
+      backgroundMusicRef.current.play().catch(() => {})
+    } else if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause()
+    }
   }
 
   const resetTimer = () => {
     setIsRunning(false)
     setIsBreak(false)
     setTimeLeft(workDuration * 60)
+    
+    // Reset audio
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause()
+      backgroundMusicRef.current.currentTime = 0
+    }
   }
 
   const minutes = Math.floor(timeLeft / 60)
   const seconds = timeLeft % 60
-
   const progress = isBreak ? (timeLeft / (breakDuration * 60)) * 100 : (timeLeft / (workDuration * 60)) * 100
 
   return (
@@ -78,13 +122,13 @@ export default function PomodoroTimer() {
               />
             </svg>
 
-            {/* Corgi Animation */}
+            {/* Corgi Animation/Image */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-48 h-48 relative">
                 <div className={`absolute inset-0 transition-opacity duration-300 ${isRunning ? 'opacity-100' : 'opacity-80'}`}>
                   <img 
-                    src="/cropped.gif" 
-                    alt="Corgi animation"
+                    src={isRunning ? "/cropped.gif" : "/cropped_still.png"}
+                    alt="Corgi"
                     className={`w-full h-full object-contain ${isBreak ? 'opacity-80 grayscale' : ''}`}
                   />
                 </div>
@@ -106,6 +150,20 @@ export default function PomodoroTimer() {
           <div className="text-4xl font-bold text-orange-900">
             {minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}
           </div>
+
+          {/* Audio Controls */}
+          {isRunning && (
+            <div className="w-full max-w-sm">
+              <audio
+                controls
+                src="/music.mp3"
+                ref={audioElementRef}
+                className="w-full"
+              >
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          )}
 
           {/* Controls */}
           <div className="flex items-center space-x-4">
@@ -166,4 +224,3 @@ export default function PomodoroTimer() {
     </div>
   )
 }
-
